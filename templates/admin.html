@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gradient-to-br from-gray-100 to-gray-200 min-h-screen">
+
+<div class="max-w-7xl mx-auto p-6">
+
+    <!-- HEADER -->
+    <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+        <h1 class="text-3xl font-bold text-gray-800">⚙️ Admin Panel</h1>
+
+        <div class="flex gap-2">
+            <a href="/dashboard" class="bg-blue-500 text-white px-4 py-2 rounded-xl shadow hover:bg-blue-600 transition">Dashboard</a>
+            <a href="/admin/logs" class="bg-purple-500 text-white px-4 py-2 rounded-xl shadow hover:bg-purple-600 transition">Logs</a>
+            <a href="/logout" class="bg-red-500 text-white px-4 py-2 rounded-xl shadow hover:bg-red-600 transition">Logout</a>
+        </div>
+    </div>
+
+    <!-- SEARCH -->
+    <form method="GET" class="mb-6 flex gap-2">
+        <input type="text" name="q" value="{{ keyword }}"
+               placeholder="🔍 ค้นหา เช่น user / tag / สถานที่"
+               class="flex-1 px-4 py-2 border rounded-xl shadow-sm focus:ring-2 focus:ring-blue-400 outline-none">
+
+        <button class="bg-green-500 text-white px-5 py-2 rounded-xl shadow hover:bg-green-600 transition">
+            ค้นหา
+        </button>
+    </form>
+
+    <!-- TABLE -->
+    <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+
+        <table class="w-full text-sm text-left">
+
+            <!-- HEADER -->
+            <thead class="bg-gray-100 text-gray-700 text-xs uppercase tracking-wider">
+                <tr>
+                    <th class="p-4">#</th>
+                    <th class="p-4">เวลา</th>
+                    <th class="p-4">ผู้ใช้</th>
+                    <th class="p-4">Tag</th>
+                    <th class="p-4">งาน</th>
+                    <th class="p-4 text-center">จัดการ</th>
+                </tr>
+            </thead>
+
+            <!-- BODY -->
+            <tbody>
+                {% for row in data %}
+                <tr class="border-b hover:bg-blue-50 transition duration-150">
+
+                    <td class="p-4 font-semibold text-gray-700">
+                        {{ loop.index }}
+                    </td>
+
+                    <td class="p-4 text-gray-600">
+                        {{ row[0] }}
+                    </td>
+
+                    <td class="p-4 font-medium">
+                        {{ row[1] }}
+                    </td>
+
+                    <td class="p-4 font-semibold text-blue-600">
+                        {{ row[2] }}
+                    </td>
+
+                    <td class="p-4">
+                        <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-medium">
+                            {{ row[3] }}
+                        </span>
+                    </td>
+
+                    <!-- ACTION -->
+                    <td class="p-4 text-center">
+                        <div class="flex justify-center gap-2">
+
+                            <a href="/admin/view/{{ row[-1] }}"
+                               class="px-3 py-1 rounded-lg bg-blue-500 text-white text-xs hover:bg-blue-600 transition shadow">
+                               ดู
+                            </a>
+
+                            <a href="/admin/delete/{{ row[-1] }}"
+                               onclick="return confirm('ลบจริงไหม?')"
+                               class="px-3 py-1 rounded-lg bg-red-500 text-white text-xs hover:bg-red-600 transition shadow">
+                               ลบ
+                            </a>
+
+                        </div>
+                    </td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+</body>
+</html>
