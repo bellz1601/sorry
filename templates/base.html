@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>ระบบเสาไฟ</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Kanit', sans-serif; }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+
+<div class="flex h-screen">
+
+    <!-- SIDEBAR -->
+    <aside class="w-64 bg-gradient-to-b from-blue-900 to-blue-700 text-white p-5">
+
+        <h1 class="text-2xl font-bold mb-6">⚡ Pole System</h1>
+
+        <nav class="space-y-2 text-sm">
+
+            <a href="/dashboard" class="block p-3 rounded-xl hover:bg-blue-600 transition">
+                🏠 Dashboard
+            </a>
+
+            <a href="/map" class="block p-3 rounded-xl hover:bg-blue-600 transition">
+                🗺 แผนที่
+            </a>
+
+            {% if session.get("role") == "admin" %}
+            <a href="/admin" class="block p-3 rounded-xl hover:bg-blue-600 transition">
+                ⚙️ Admin
+            </a>
+            {% endif %}
+
+            <div class="pt-4">
+                <a href="/logout" class="block text-center bg-red-500 p-2 rounded-xl hover:bg-red-600">
+                    ออกจากระบบ
+                </a>
+            </div>
+
+        </nav>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="flex-1 p-6 overflow-y-auto">
+
+        <!-- TOPBAR -->
+        <div class="bg-white rounded-xl shadow p-4 mb-6 flex justify-between items-center">
+            <h2 class="text-lg font-semibold">{% block header %}{% endblock %}</h2>
+            <div class="text-gray-600">👤 {{ session.get("user") }}</div>
+        </div>
+
+        {% block content %}{% endblock %}
+
+    </main>
+
+</div>
+
+</body>
+</html>

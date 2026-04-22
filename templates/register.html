@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block header %}สมัครสมาชิก{% endblock %}
+
+{% block content %}
+
+<div class="flex justify-center items-center">
+
+    <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-xl">
+
+        <h2 class="text-xl font-bold mb-6 text-center">📝 สมัครสมาชิก</h2>
+
+        <form method="post" class="grid md:grid-cols-2 gap-4">
+
+            <!-- USERNAME -->
+            <div>
+                <label class="text-sm text-gray-600">ชื่อผู้ใช้</label>
+                <input name="username"
+                    class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400 outline-none">
+            </div>
+
+            <!-- PASSWORD -->
+            <div>
+                <label class="text-sm text-gray-600">รหัสผ่าน</label>
+                <input type="password" name="password"
+                    class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400 outline-none">
+            </div>
+
+            <!-- CONFIRM -->
+            <div class="md:col-span-2">
+                <label class="text-sm text-gray-600">ยืนยันรหัสผ่าน</label>
+                <input type="password" name="confirm"
+                    class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400 outline-none">
+            </div>
+
+            <!-- BUTTON -->
+            <div class="md:col-span-2 mt-2">
+                <button
+                    class="w-full bg-green-600 text-white p-3 rounded-xl hover:bg-green-700 transition text-lg">
+                    สมัครสมาชิก
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}
