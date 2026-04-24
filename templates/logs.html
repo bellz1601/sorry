@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Activity Logs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gradient-to-br from-gray-100 to-gray-200 min-h-screen">
+
+<div class="max-w-6xl mx-auto p-6">
+
+    <!-- HEADER -->
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">📜 ประวัติการใช้งาน</h1>
+
+        <a href="/admin"
+           class="bg-blue-500 text-white px-4 py-2 rounded-xl shadow hover:bg-blue-600 transition">
+           ← กลับหน้า Admin
+        </a>
+    </div>
+
+    <!-- TABLE -->
+    <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+
+        <table class="w-full text-sm text-left">
+
+            <!-- HEADER -->
+            <thead class="bg-gray-100 text-gray-700 text-xs uppercase tracking-wider">
+                <tr>
+                    <th class="p-4">#</th>
+                    <th class="p-4">เวลา</th>
+                    <th class="p-4">ผู้ใช้</th>
+                    <th class="p-4">กิจกรรม</th>
+                    <th class="p-4">งาน</th>
+                    <th class="p-4 text-center">จัดการ</th> <!-- 🔥 เพิ่ม -->
+                </tr>
+            </thead>
+
+            <!-- BODY -->
+            <tbody>
+                {% for log in logs %}
+                <tr class="border-b hover:bg-blue-50 transition">
+
+                    <td class="p-4 font-semibold text-gray-700">
+                        {{ loop.index }}
+                    </td>
+
+                    <td class="p-4 text-gray-600">
+                        {{ log[0] }}
+                    </td>
+
+                    <td class="p-4 font-medium">
+                        {{ log[1] }}
+                    </td>
+
+                    <!-- ACTION -->
+                    <td class="p-4">
+                        {% if log[2] == "login" %}
+                            <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-medium">
+                                🔓 Login
+                            </span>
+                        {% elif log[2] == "logout" %}
+                            <span class="bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-xs font-medium">
+                                🔒 Logout
+                            </span>
+                        {% else %}
+                            <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-medium">
+                                {{ log[2] }}
+                            </span>
+                        {% endif %}
+                    </td>
+
+                    <td class="p-4">
+                        <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs font-medium">
+                            {{ log[3] }}
+                        </span>
+                    </td>
+
+                    <!-- 🔥 ปุ่มลบ -->
+                    <td class="p-4 text-center">
+                        <a href="/admin/logs/delete/{{ loop.index + 1 }}"
+                           onclick="return confirm('ลบ log นี้จริงไหม?')"
+                           class="px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 text-xs shadow">
+                           ลบ
+                        </a>
+                    </td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+</body>
+</html>

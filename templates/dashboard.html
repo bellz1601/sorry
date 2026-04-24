@@ -1,0 +1,339 @@
+{% extends "base.html" %}
+{% block title %}ฟอร์มตรวจเสาไฟ{% endblock %}
+{% block content %}
+{% if session.get("role") == "admin" %}
+    <a href="/admin">⚙️ ไปหน้า Admin</a>
+    <br><br>
+{% endif %}
+<form id="inspect-form" method="post" enctype="multipart/form-data" class="bg-white rounded-2xl shadow p-6 space-y-6">
+ <div class="flex justify-between items-center text-sm text-slate-500">
+  <div>
+    ผู้ปฏิบัติงาน: <b>{{ username }}</b> | งาน: <b>{{ task }}</b>
+  </div>
+
+  <div>
+    {% if session.get("role") == "admin" %}
+      <span class="px-2 py-1 bg-red-500 text-white rounded-lg text-xs">ADMIN</span>
+    {% else %}
+      <span class="px-2 py-1 bg-blue-500 text-white rounded-lg text-xs">USER</span>
+    {% endif %}
+  </div>
+</div>
+  <!-- STEP 1: อ่านแท็ก -->
+  <div class="grid md:grid-cols-4 gap-5">
+    <div class="md:col-span-4">
+      <label class="block text-sm mb-1"></label>
+      <div class="grid md:grid-cols-3 gap-2">
+  <div>
+    <label class="text-xs">Tag ID</label>
+    <input id="tag_id" name="post_id"
+class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm h-10
+focus:outline-none focus:ring-0 focus:border-slate-300">
+  </div>
+
+  <div>
+    <label class="text-xs">รหัสแท็กที่เสา</label>
+    <input id="epc"
+  class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm h-10 focus:outline-none"
+  readonly>
+  </div>
+  <div>
+  <label class="text-xs">ชื่อเสา</label>
+  <input name="pole_name"
+    placeholder="เช่น เสาหน้าโรงเรียน"
+    class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm h-10">
+</div>
+</div>
+<input id="rssi" placeholder="RSSI" class="border p-2 mt-2" readonly>
+<p id="tag-time" class="text-xs text-blue-600 mt-1"></p>
+      <p class="text-xs text-slate-500 mt-1">*สแกนหรือกรอก Tag ID ก่อน จึงจะเริ่มตรวจได้</p>
+    <div class="flex items-end gap-2">
+  <button id="confirm-tag" type="button"
+    class="w-full md:w-auto px-4 py-2 rounded-xl bg-slate-900 text-white">
+    ค้นหาแท็ก
+  </button>
+
+  <!-- ✅ ปุ่มใหม่ -->
+  <button id="lock-tag" type="button"
+    class="w-full md:w-auto px-4 py-2 rounded-xl bg-emerald-600 text-white">
+    ยืนยันแท็ก
+  </button>
+</div>
+
+  <!-- STEP 2: แผนภาพคลิกเลือกสถานะ -->
+  <div id="diagram-wrap" class="opacity-50 pointer-events-none transition">
+    <div class="mb-2 text-sm">แตะที่ไอคอนเพื่อเลือก “ชำรุด/ไม่ชำรุด”</div>
+
+    <!-- พิกัด -->
+    <div class="grid grid-cols-2 gap-2 mt-2">
+      <input name="latitude" id="latitude" placeholder="Latitude" class="border p-2 rounded">
+      <input name="longitude" id="longitude" placeholder="Longitude" class="border p-2 rounded">
+    </div>
+    <div class="text-right">
+      <button type="button" id="open-map" class="text-blue-600 underline">ดูบน Google Maps</button>
+    </div>
+
+    <!-- แผนภาพ + ปุ่มไอคอน -->
+   
+      <!-- เสาไฟ (พื้นหลัง) -->
+      <div class="relative w-[700px] mx-auto">
+  <img src="/static/pole.png"
+       class="w-full h-auto block select-none pointer-events-none">
+
+      <!-- 1) หลอดไฟ -->
+      <button type="button" data-part="lamp_head"
+        class="icon-btn absolute top-[80px] right-1/4"
+        title="1) หลอดไฟ" aria-label="หลอดไฟ">
+        <span class="badge">1</span>
+        <!-- ไอคอนหลอดไฟ -->
+        <svg viewBox="0 0 24 24" class="w-9 h-9">
+          <path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3 11v1a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-1a6 6 0 0 0-3-11Z" fill="none" stroke="currentColor" stroke-width="1.6"/>
+        </svg>
+      </button>
+
+      <!-- 2) โครงสร้างเสา -->
+<button type="button" data-part="pole"
+  class="icon-btn absolute top-[400px] left-1/2 -translate-x-1/2"
+  title="2) โครงสร้างเสา" aria-label="โครงสร้างเสา">
+  <span class="badge">2</span>
+  <!-- ไอคอนเสา (แบบกลม) -->
+  <svg viewBox="0 0 24 24" class="w-9 h-9">
+    <rect x="10" y="3" width="4" height="18" rx="2" 
+          fill="url(#gradPole)" stroke="#334155" stroke-width="1.2"/>
+    <defs>
+      <linearGradient id="gradPole" x1="0" x2="1" y1="0" y2="0">
+        <stop offset="0%" stop-color="#9ca3af"/>
+        <stop offset="100%" stop-color="#6b7280"/>
+      </linearGradient>
+    </defs>
+  </svg>
+</button>
+
+<!-- 3) สายไฟ -->
+<button type="button" data-part="wiring"
+  class="icon-btn absolute bottom-[70px] left-1/2 -translate-x-1/2"
+  title="3) สายไฟ" aria-label="สายไฟ">
+  <span class="badge">3</span>
+  <!-- ไอคอนสายไฟ -->
+  <svg viewBox="0 0 32 24" class="w-9 h-9">
+    <path d="M2 12 C8 4, 24 20, 30 12" 
+          fill="none" stroke="#0f172a" stroke-width="2"/>
+    <!-- จุดปลายสาย -->
+    <circle cx="2" cy="12" r="2" fill="#0ea5e9"/>
+    <circle cx="30" cy="12" r="2" fill="#0ea5e9"/>
+  </svg>
+</button>
+    </div>
+
+    <!-- สรุปสถานะ -->
+    <div class="grid grid-cols-3 gap-3 mt-4 text-sm text-center">
+    <div>1) หลอดไฟ: <span id="lamp_head_label" class="font-medium">-</span></div>
+    <div>2) โครงสร้างเสา: <span id="pole_label" class="font-medium">-</span></div>
+    <div>3) สายไฟ: <span id="wiring_label" class="font-medium">-</span></div>
+  </div>
+</div>
+
+  <!-- hidden inputs -->
+  <input type="hidden" name="lamp_head" id="lamp_head_input">
+  <input type="hidden" name="pole" id="pole_input">
+  <input type="hidden" name="wiring" id="wiring_input">
+
+  <!-- อื่น ๆ -->
+  <div>
+    <label class="block text-sm mb-1">หมายเหตุ</label>
+    <textarea name="note" class="w-full border rounded-xl p-2" rows="3"></textarea>
+  </div>
+  <div>
+    <label class="block text-sm mb-1">พิกัด/ที่อยู่</label>
+    <input name="location" class="w-full border rounded-xl p-2" placeholder="เช่น ซอย 3 หน้าอาคาร X">
+  </div>
+  <div>
+    <label class="block text-sm mb-1">รูปประกอบ (ถ้ามี)</label>
+    <input type="file" name="photo" accept="image/*">
+  </div>
+
+  <button class="px-4 py-2 rounded-xl bg-emerald-600 text-white">บันทึกผลตรวจ</button>
+</form>
+
+<!-- Modal เลือกสถานะ -->
+<div id="status-modal" class="fixed inset-0 hidden items-center justify-center bg-black/50 z-50">
+  <div class="bg-white rounded-2xl p-5 w-[320px]">
+    <div class="text-lg font-semibold mb-3" id="modal-title">เลือกสถานะ</div>
+    <div class="grid grid-cols-2 gap-3">
+      <button type="button" data-choice="ไม่ชำรุด" class="px-3 py-2 rounded-xl border">ไม่ชำรุด</button>
+      <button type="button" data-choice="ชำรุด" class="px-3 py-2 rounded-xl border">ชำรุด</button>
+    </div>
+    <div class="mt-4 text-right">
+      <button id="modal-cancel" class="text-sm text-slate-500 hover:underline">ยกเลิก</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .icon-btn{
+    position: absolute;
+    display: grid;
+    place-items: center;
+    width: 44px; height: 44px;
+    background: #fff;
+    color: #0f172a;
+    border: 2px solid #94a3b8;
+    border-radius: 14px;
+    box-shadow: 0 4px 12px rgba(2,6,23,.08);
+    transition: .15s;
+  }
+  .icon-btn:hover{ transform: translateY(-1px); box-shadow: 0 6px 16px rgba(2,6,23,.12); }
+  .icon-btn.active{ border-color:#0ea5e9; box-shadow:0 0 0 4px rgba(14,165,233,.18); }
+  .badge{
+    position:absolute; top:-10px; left:-10px;
+    width:24px; height:24px; border-radius:9999px;
+    display:grid; place-items:center;
+    background:#0ea5e9; color:white; font-size:12px; font-weight:700;
+    box-shadow: 0 2px 6px rgba(14,165,233,.35);
+  }
+</style>
+
+<script>
+  // เปิดใช้งานผังหลังค้นหาแท็ก
+  const confirmBtn = document.getElementById('confirm-tag');
+  const diagramWrap = document.getElementById('diagram-wrap');
+  confirmBtn.addEventListener('click', async () => {
+  try {
+    const res = await fetch('/api/tags', { credentials: 'same-origin' });
+    const data = await res.json();
+
+    if (!data.items || data.items.length === 0) {
+      alert('ยังไม่พบแท็ก กรุณาสแกนก่อน');
+      return;
+    }
+
+    const latest = data.items[data.items.length - 1];
+
+// ✅ ใส่ค่าถูกช่อง
+document.getElementById('tag_id').value = latest.tag_id || '';
+document.getElementById('epc').value = latest.epc || '';
+document.getElementById('rssi').value = latest.rssi || '';
+
+    diagramWrap.classList.remove('opacity-50','pointer-events-none');
+
+  } catch (e) {
+    console.error(e);
+    alert('ดึงข้อมูลแท็กไม่สำเร็จ');
+  }
+});
+
+  // Modal & Map
+  const modal = document.getElementById('status-modal');
+  const modalTitle = document.getElementById('modal-title');
+  const cancelBtn = document.getElementById('modal-cancel');
+  const choices = modal.querySelectorAll('[data-choice]');
+  let currentPart = null;
+
+  const mapObj = {
+    lamp_head: {label: document.getElementById('lamp_head_label'), input: document.getElementById('lamp_head_input'), title: 'หลอดไฟ'},
+    pole:      {label: document.getElementById('pole_label'),      input: document.getElementById('pole_input'),      title: 'โครงสร้างเสา'},
+    wiring:    {label: document.getElementById('wiring_label'),    input: document.getElementById('wiring_input'),    title: 'สายไฟ'}
+  };
+
+  document.querySelectorAll('[data-part]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      if(diagramWrap.classList.contains('pointer-events-none')) return;
+      document.querySelectorAll('[data-part]').forEach(h=>h.classList.remove('active'));
+      el.classList.add('active');
+      currentPart = el.dataset.part;
+      modalTitle.textContent = `เลือกสถานะ: ${mapObj[currentPart].title}`;
+      modal.classList.remove('hidden'); modal.classList.add('flex');
+    });
+  });
+
+  choices.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(!currentPart) return;
+      const value = btn.dataset.choice;
+      mapObj[currentPart].label.textContent = value;
+      mapObj[currentPart].input.value = value;
+      modal.classList.add('hidden'); modal.classList.remove('flex');
+    });
+  });
+
+  cancelBtn.addEventListener('click', ()=>{
+    modal.classList.add('hidden'); modal.classList.remove('flex');
+  });
+
+  
+  // ปุ่มเปิด Google Maps จากช่อง lat/lng
+  document.getElementById('open-map').addEventListener('click', ()=>{
+    const lat = (document.getElementById('latitude').value || '').trim();
+    const lng = (document.getElementById('longitude').value || '').trim();
+    if(!lat || !lng){ alert('กรุณากรอก Latitude และ Longitude'); return; }
+    window.open(`https://www.google.com/maps?q=${encodeURIComponent(lat)},${encodeURIComponent(lng)}&z=18`, '_blank');
+  });
+</script>
+<script>
+  // ✅ ปุ่มยืนยันแท็ก (เพิ่มใหม่ ไม่ยุ่งของเดิม)
+  document.addEventListener('DOMContentLoaded', () => {
+    const lockBtn = document.getElementById('lock-tag');
+    const tagInput = document.getElementById('tag_id');
+    const diagramWrap = document.getElementById('diagram-wrap');
+
+    if (!lockBtn) return;
+
+    lockBtn.addEventListener('click', () => {
+      const value = (tagInput.value || '').trim();
+
+      if (!value) {
+        alert('กรุณากรอกหรือค้นหา Tag ก่อน');
+        return;
+      }
+
+      // 🔒 ล็อกค่า
+      tagInput.readOnly = true;
+      tagInput.classList.add('bg-green-50','border-green-600');
+
+      // ✅ เปิดใช้งานแผนภาพ
+      diagramWrap.classList.remove('opacity-50','pointer-events-none');
+
+      alert('ยืนยันแท็กเรียบร้อย');
+    });
+  });
+</script>
+<script src="/static/js/tagstream_client.js"></script>
+
+<script>
+TagStreamClient.start({
+  onTags: (items) => {
+
+    const t = items[items.length - 1];
+    if (!t) return;
+
+    const tagInput = document.getElementById('tag_id');
+
+    // 🔒 ถ้ากดยืนยันแล้ว → หยุด
+    if (tagInput.readOnly) return;
+
+    // 🔥 ถ้ามีค่าแล้ว (ผู้ใช้พิมพ์เอง) → ห้ามทับ
+    if (tagInput.value.trim() !== "") return;
+
+    document.getElementById('tag_id').value = t.tag_id || '';
+    document.getElementById('epc').value = t.epc || '';
+    document.getElementById('rssi').value = t.rssi || '';
+
+    document.getElementById('tag-time').innerText =
+      'เวลาที่สแกน: ' + (t.ts || '-');
+  }
+});
+</script>
+<style>
+input {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+input:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: #cbd5e1 !important; /* slate-300 */
+}
+</style>
+{% endblock %}

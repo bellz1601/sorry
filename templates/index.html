@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block header %}Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="grid md:grid-cols-3 gap-6">
+
+    <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+        <p class="text-gray-500">จำนวนเสาไฟ</p>
+        <h1 class="text-3xl font-bold">{{ total }}</h1>
+    </div>
+
+    <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+        <p class="text-gray-500">สถานะ</p>
+        <h1 class="text-3xl text-green-600">ปกติ</h1>
+    </div>
+
+    <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+        <p class="text-gray-500">แจ้งเตือน</p>
+        <h1 class="text-3xl text-red-500">0</h1>
+    </div>
+
+</div>
+
+{% endblock %}

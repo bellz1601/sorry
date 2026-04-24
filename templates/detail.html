@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>รายละเอียดงาน</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 p-6">
+
+<div class="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow-lg">
+
+    <h1 class="text-2xl font-bold mb-4">📋 รายละเอียดงาน</h1>
+
+    <div class="space-y-3 text-gray-700">
+
+        <p><b>เวลา:</b> {{ row[0] }}</p>
+        <p><b>ผู้ใช้:</b> {{ row[1] }}</p>
+        <p><b>Tag:</b> {{ row[2] }}</p>
+
+        <p>
+            <b>งาน:</b>
+            <span class="bg-green-200 text-green-800 px-2 py-1 rounded">
+                {{ row[3] }}
+            </span>
+        </p>
+
+        <hr>
+
+        <p><b>หลอดไฟ:</b> {{ row[4] }}</p>
+        <p><b>เสาไฟ:</b> {{ row[5] }}</p>
+        <p><b>สายไฟ:</b> {{ row[6] }}</p>
+
+        <hr>
+
+        <p><b>พิกัด:</b> {{ row[7] }}, {{ row[8] }}</p>
+
+        {% if row[9] %}
+        <a href="{{ row[9] }}" target="_blank"
+           class="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+           🌍 เปิดแผนที่
+        </a>
+        {% endif %}
+
+        <hr>
+
+        <p><b>หมายเหตุ:</b> {{ row[10] }}</p>
+        <p><b>สถานที่:</b> {{ row[11] }}</p>
+
+        <!-- รูป -->
+        <div>
+            <p class="font-bold mb-2">📸 รูปภาพ</p>
+
+            {% if row[12] %}
+                <img src="{{ row[12] }}"
+                     class="w-full rounded-lg shadow hover:scale-105 transition cursor-pointer"
+                     onclick="window.open(this.src)">
+            {% elif row[13] %}
+                <img src="/uploads/{{ row[13] }}"
+                     class="w-full rounded-lg shadow">
+            {% else %}
+                <p class="text-gray-400">ไม่มีรูป</p>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <a href="/admin"
+       class="mt-6 inline-block bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+        ⬅ กลับ
+    </a>
+
+</div>
+
+</body>
+</html>
