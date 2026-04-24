@@ -58,6 +58,26 @@ def init_excel_files():
         ws.title = "activity"; ws.append(HEADERS_ACTIVITY)
         wb.save(ACTIVITY_FILE)
 init_excel_files()
+def create_admin():
+    from openpyxl import load_workbook
+
+    wb = load_workbook(USER_FILE)
+    ws = wb.active
+
+    found = False
+    for row in ws.iter_rows(min_row=2, values_only=True):
+        if row and row[0] == "admin":
+            found = True
+            break
+
+    if not found:
+        ws.append(["admin", "1234", "admin"])
+        wb.save(USER_FILE)
+        print("✅ Created admin user")
+
+    wb.close()
+
+create_admin()
 
 def _gs_client():
     scope = ["https://spreadsheets.google.com/feeds",
