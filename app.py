@@ -33,7 +33,7 @@ app.secret_key = 'supersecretkey'
 app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE="Lax")
 
 # ---- Start RFID TagStream listener ----
-start_tagstream_in_background(host="0.0.0.0", port=4000)
+# start_tagstream_in_background(host="0.0.0.0", port=4000)
 
 HEADERS_USERS = ["username","password","role"]
 HEADERS_INSPECTION = [
@@ -495,6 +495,19 @@ def delete_log(row_id):
     wb.close()
 
     return redirect("/admin/logs")
+
+@app.post("/api/tags")
+def receive_tag():
+    data = request.json
+
+    SIM_TAG_BUFFER.append({
+        "ts": datetime.now().isoformat(),
+        "epc": data.get("epc"),
+        "rssi": data.get("rssi"),
+        "antenna": "rfid"
+    })
+
+    return {"ok": True}
 
 if __name__ == '__main__':
     print("📂 BASE_DIR:", BASE_DIR, flush=True)
