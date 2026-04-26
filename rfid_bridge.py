@@ -16,6 +16,19 @@
 import socket
 import threading
 import json
+import requests  # 👈 เพิ่มบรรทัดนี้
+
+def send_to_web(epc, rssi):
+    try:
+        requests.post(
+            "https://YOUR-APP.onrender.com/api/tags",  # 🔥 เปลี่ยนเป็นลิงก์คุณ
+            json={
+                "epc": epc,
+                "rssi": rssi
+            }
+        )
+    except Exception as e:
+        print("❌ post fail:", e)
 from datetime import datetime, timezone
 from collections import deque
 
@@ -115,12 +128,20 @@ def _client_handler(conn, addr):
                         s = line.decode("utf-8", errors="ignore")
                     except Exception:
                         s = ""
+
                     item = _parse_line(s)
+
                     if item:
                         _append_item(item)
+
+                        # 🔥 ส่งไปเว็บ (อยู่ใน if และ loop เท่านั้น)
+                        try:
+                            send_to_web(item.get("epc"), item.get("rssi"))
+                        except Exception as e:
+                            print("❌ send error:", e)
+
     except Exception as e:
         print("RFID client error:", e)
-
 def start_tagstream_in_background(host="0.0.0.0", port=4000):
     # Start TCP server that accepts TagStream connections from Alien readers.
     def _server():
@@ -133,6 +154,8 @@ def start_tagstream_in_background(host="0.0.0.0", port=4000):
             conn, addr = srv.accept()
             t = threading.Thread(target=_client_handler, args=(conn, addr), daemon=True)
             t.start()
+
+    
 
     th = threading.Thread(target=_server, daemon=True)
     th.start()
