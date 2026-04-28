@@ -289,8 +289,7 @@ def dashboard():
                        last_tag_id=(last_saved or {}).get("tag_id",""))
 
 
-# 🔥 วางตรงนี้เลย
-from flask import flash, redirect, url_for
+
 
 @app.route('/admin')
 def admin():
@@ -508,6 +507,32 @@ def receive_tag():
     })
 
     return {"ok": True}
+
+@app.route("/export-csv")
+def export_csv():
+
+    # 🔒 จำกัดสิทธิ์แอดมิน
+    if session.get("role") != "admin":
+        return redirect("/dashboard")
+
+    def generate():
+        wb = load_workbook(INSPECTION_FILE)
+        ws = wb.active
+
+        # หัวตาราง
+        headers = [cell.value for cell in ws[1]]
+        yield ",".join(headers) + "\n"
+
+        # ข้อมูล
+        for row in ws.iter_rows(min_row=2, values_only=True):
+            row_data = [str(cell) if cell is not None else "" for cell in row]
+            yield ",".join(row_data) + "\n"
+
+    return Response(
+        generate(),
+        mimetype="text/csv",
+        headers={"Content-Disposition": "attachment; filename=inspection.csv"}
+    )
 
 if __name__ == '__main__':
     print("📂 BASE_DIR:", BASE_DIR, flush=True)
