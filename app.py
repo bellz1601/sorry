@@ -8,6 +8,8 @@ from datetime import datetime, timezone
 from functools import wraps
 from collections import deque
 import os
+import csv
+import io
 
 # ===== RFID Bridge (Alien TagStream) =====
 from rfid_bridge import start_tagstream_in_background, read_tags_since, latest_ts, clear_tags
@@ -511,29 +513,39 @@ def receive_tag():
 @app.route("/export-csv")
 def export_csv():
 
-    # 🔒 จำกัดสิทธิ์แอดมิน
     if session.get("role") != "admin":
-        return redirect("/dashboard")
+        return "ไม่มีสิทธิ์"
 
-    def generate():
-        wb = load_workbook(INSPECTION_FILE)
-        ws = wb.active
+    wb = load_workbook(INSPECTION_FILE)
+    ws = wb.active
 
-        # หัวตาราง
-        headers = [cell.value for cell in ws[1]]
-        yield ",".join(headers) + "\n"
+    output = io.StringIO()
+    writer = csv.writer(output)
 
-        # ข้อมูล
-        for row in ws.iter_rows(min_row=2, values_only=True):
-            row_data = [str(cell) if cell is not None else "" for cell in row]
-            yield ",".join(row_data) + "\n"
+    # หัวตาราง
+    writer.writerow([
+        "timestamp","username","tag_id","task",
+        "หลอดไฟ","เสาไฟ","สายไฟ",
+        "latitude","longitude",
+        "maps_link","note","location",
+        "photo_url","photo_file",
+        "login_at","logout_at"
+    ])
+
+    # ข้อมูลจริงจาก Excel
+    for row in ws.iter_rows(min_row=2, values_only=True):
+        writer.writerow(row)
+
+    wb.close()
 
     return Response(
-        generate(),
-        mimetype="text/csv",
-        headers={"Content-Disposition": "attachment; filename=inspection.csv"}
+        output.getvalue().encode("utf-8-sig"),
+        mimetype="text/csv; charset=utf-8",
+        headers={
+            "Content-Disposition":
+            "attachment; filename=inspection.csv"
+        }
     )
-
 if __name__ == '__main__':
     print("📂 BASE_DIR:", BASE_DIR, flush=True)
     print("🔍 Looking for credentials at:", GOOGLE_CREDENTIALS_JSON, flush=True)
