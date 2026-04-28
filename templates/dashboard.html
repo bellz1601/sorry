@@ -2,15 +2,10 @@
 {% block title %}ฟอร์มตรวจเสาไฟ{% endblock %}
 {% block content %}
 {% if session.get("role") == "admin" %}
-<div class="flex gap-2 mb-4">
+<div class="mb-4">
     <a href="/admin"
-       class="px-4 py-2 bg-slate-800 text-white rounded-xl">
+       class="px-4 py-2 bg-slate-800 text-white rounded-xl inline-block">
        ⚙️ หน้า Admin
-    </a>
-
-    <a href="/export-csv"
-       class="px-4 py-2 bg-emerald-600 text-white rounded-xl">
-       📥 Export CSV
     </a>
 </div>
 {% endif %}
