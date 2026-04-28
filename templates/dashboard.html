@@ -86,7 +86,7 @@ focus:outline-none focus:ring-0 focus:border-slate-300">
 
       <!-- 1) หลอดไฟ -->
       <button type="button" data-part="lamp_head"
-        class="icon-btn absolute top-[30px] right-[30px]"
+        class="icon-btn absolute top-[20px] right-[20px]"
         title="1) หลอดไฟ" aria-label="หลอดไฟ">
         <span class="badge">1</span>
         <!-- ไอคอนหลอดไฟ -->
@@ -161,18 +161,41 @@ focus:outline-none focus:ring-0 focus:border-slate-300">
 
 <!-- Modal เลือกสถานะ -->
 <div id="status-modal" class="fixed inset-0 hidden items-center justify-center bg-black/50 z-50">
-  <div class="bg-white rounded-2xl p-5 w-[320px]">
-    <div class="text-lg font-semibold mb-3" id="modal-title">เลือกสถานะ</div>
-    <div class="grid grid-cols-2 gap-3">
-      <button type="button" data-choice="ไม่ชำรุด" class="px-3 py-2 rounded-xl border">ไม่ชำรุด</button>
-      <button type="button" data-choice="ชำรุด" class="px-3 py-2 rounded-xl border">ชำรุด</button>
+  <div class="bg-white rounded-2xl p-5 w-[360px]">
+    
+    <div class="text-lg font-semibold mb-3" id="modal-title">
+      เลือกสถานะ
     </div>
-    <div class="mt-4 text-right">
-      <button id="modal-cancel" class="text-sm text-slate-500 hover:underline">ยกเลิก</button>
+
+    <div class="grid grid-cols-2 gap-3 mb-4">
+      <button type="button" data-choice="ไม่ชำรุด"
+        class="px-3 py-2 rounded-xl border">
+        ไม่ชำรุด
+      </button>
+
+      <button type="button" data-choice="ชำรุด"
+        class="px-3 py-2 rounded-xl border">
+        ชำรุด
+      </button>
     </div>
+
+    <div class="mb-4">
+      <label class="text-sm block mb-1">หมายเหตุ</label>
+      <input id="modal-note"
+        type="text"
+        class="w-full border rounded-xl px-3 py-2"
+        placeholder="เช่น หลอดไม่ติด / สายขาด">
+    </div>
+
+    <div class="text-right">
+      <button id="modal-cancel"
+        class="text-sm text-slate-500 hover:underline">
+        ยกเลิก
+      </button>
+    </div>
+
   </div>
 </div>
-
 <style>
   .icon-btn{
     position: absolute;
@@ -251,14 +274,28 @@ document.getElementById('rssi').value = latest.rssi || '';
   });
 
   choices.forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      if(!currentPart) return;
-      const value = btn.dataset.choice;
-      mapObj[currentPart].label.textContent = value;
-      mapObj[currentPart].input.value = value;
-      modal.classList.add('hidden'); modal.classList.remove('flex');
-    });
+  btn.addEventListener('click', ()=>{
+    if(!currentPart) return;
+
+    const value = btn.dataset.choice;
+    const note = document.getElementById('modal-note').value.trim();
+
+    // ถ้ามีหมายเหตุ ให้ต่อท้าย
+    let finalValue = value;
+    if(note !== ""){
+      finalValue += " (" + note + ")";
+    }
+
+    mapObj[currentPart].label.textContent = finalValue;
+    mapObj[currentPart].input.value = finalValue;
+
+    // ล้างค่า modal
+    document.getElementById('modal-note').value = "";
+
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
   });
+});
 
   cancelBtn.addEventListener('click', ()=>{
     modal.classList.add('hidden'); modal.classList.remove('flex');
