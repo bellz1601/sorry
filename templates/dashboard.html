@@ -2,8 +2,17 @@
 {% block title %}ฟอร์มตรวจเสาไฟ{% endblock %}
 {% block content %}
 {% if session.get("role") == "admin" %}
-    <a href="/admin">⚙️ ไปหน้า Admin</a>
-    <br><br>
+<div class="flex gap-2 mb-4">
+    <a href="/admin"
+       class="px-4 py-2 bg-slate-800 text-white rounded-xl">
+       ⚙️ หน้า Admin
+    </a>
+
+    <a href="/export-csv"
+       class="px-4 py-2 bg-emerald-600 text-white rounded-xl">
+       📥 Export CSV
+    </a>
+</div>
 {% endif %}
 <form id="inspect-form" method="post" enctype="multipart/form-data" class="bg-white rounded-2xl shadow p-6 space-y-6">
  <div class="flex justify-between items-center text-sm text-slate-500">
