@@ -7,6 +7,8 @@ from openpyxl import Workbook, load_workbook
 from datetime import datetime, timezone
 from functools import wraps
 from collections import deque
+from datetime import datetime, timezone, timedelta
+THAI_TZ = timezone(timedelta(hours=7))
 import os
 import csv
 import io
@@ -256,8 +258,8 @@ def dashboard():
         tag_id = request.form.get('post_id','').strip()
 
         lamp_val   = (request.form.get('หลอดไฟ') or request.form.get('lamp_head') or "").strip()
-        pole_val   = (request.form.get('เสาไฟ')  or request.form.get('pole')      or "").strip()
-        wiring_val = (request.form.get('สายไฟ')  or request.form.get('wiring')    or "").strip()
+        pole_val   = (request.form.get('กิ่ง')  or request.form.get('pole')      or "").strip()
+        wiring_val = (request.form.get('เสา')  or request.form.get('wiring')    or "").strip()
         base_val = request.form.get('base',"").strip()
         control_val = request.form.get('control_box',"").strip()
 
@@ -276,7 +278,7 @@ def dashboard():
             photo_url = f"{base_url}/uploads/{photo_filename}"
 
         data = {
-            "timestamp": datetime.now().isoformat(timespec="seconds"),
+            "timestamp": datetime.now(THAI_TZ).isoformat(timespec="seconds"),
             "username": session['user'],
             "tag_id": tag_id,
             "task": session.get("task","inspection"),
@@ -550,17 +552,28 @@ def export_csv():
 
     # หัวตาราง
     writer.writerow([
-    "timestamp","username","tag_id","task",
-    "หลอดไฟ","กิ่ง","เสา",
-    "ระบบไฟเข้า","ตอม่อ",
-    "latitude","longitude",
-    "maps_link","note","location",
-    "photo_url","photo_file",
-    "login_at","logout_at"
-])
+        "timestamp","username","tag_id","task",
+        "หลอดไฟ","กิ่ง","เสา",
+        "ระบบไฟเข้า","ตอม่อ",
+        "latitude","longitude",
+        "maps_link","note","location",
+        "photo_url","photo_file",
+        "login_at","logout_at"
+    ])
 
     # ข้อมูลจริงจาก Excel
     for row in ws.iter_rows(min_row=2, values_only=True):
+        row = list(row)
+
+        # ✅ แปลงเวลาเป็นเวลาไทย
+        try:
+            if row[0]:
+                dt = datetime.fromisoformat(str(row[0]))
+                dt = dt.astimezone(THAI_TZ)
+                row[0] = dt.strftime("%Y-%m-%d %H:%M:%S")
+        except:
+            pass
+
         writer.writerow(row)
 
     wb.close()
@@ -569,8 +582,7 @@ def export_csv():
         output.getvalue().encode("utf-8-sig"),
         mimetype="text/csv; charset=utf-8",
         headers={
-            "Content-Disposition":
-            "attachment; filename=inspection.csv"
+            "Content-Disposition": "attachment; filename=inspection.csv"
         }
     )
 if __name__ == '__main__':
