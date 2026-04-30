@@ -153,10 +153,10 @@ focus:outline-none focus:ring-0 focus:border-slate-300">
     <!-- สรุปสถานะ -->
     <div class="grid grid-cols-3 gap-3 mt-4 text-sm text-center">
     <div>1) หลอดไฟ: <span id="lamp_head_label" class="font-medium">-</span></div>
-    <div>2) โครงสร้างเสา: <span id="pole_label" class="font-medium">-</span></div>
-    <div>3) สายไฟ: <span id="wiring_label" class="font-medium">-</span></div>
-    <div>4) ฐานเสา: <span id="base_label">-</span></div>
-<div>5) กล่องควบคุม: <span id="control_box_label">-</span></div>
+    <div>2) กิ่ง: <span id="pole_label">-</span></div>
+<div>3) เสา: <span id="wiring_label">-</span></div>
+<div>4) ระบบไฟเข้า: <span id="base_label">-</span></div>
+<div>5) ตอม่อ: <span id="control_box_label">-</span></div>
   </div>
 </div>
 
@@ -290,26 +290,24 @@ const mapObj = {
   pole: {
     label: document.getElementById('pole_label'),
     input: document.getElementById('pole_input'),
-    title: 'โครงสร้างเสา'
+    title: 'กิ่ง'
   },
   wiring: {
     label: document.getElementById('wiring_label'),
     input: document.getElementById('wiring_input'),
-    title: 'สายไฟ'
-  }, // ✅ ต้องมี comma
-
+    title: 'เสา'
+  },
   base: {
     label: document.getElementById('base_label'),
     input: document.getElementById('base_input'),
-    title: 'ฐานเสา'
+    title: 'ระบบไฟเข้า'
   },
   control_box: {
     label: document.getElementById('control_box_label'),
     input: document.getElementById('control_box_input'),
-    title: 'กล่องควบคุม'
+    title: 'ตอม่อ'
   }
 };
-
   document.querySelectorAll('[data-part]').forEach(el=>{
     el.addEventListener('click', ()=>{
       if(diagramWrap.classList.contains('pointer-events-none')) return;
