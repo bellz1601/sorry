@@ -26,17 +26,21 @@
         <hr>
 
         <p><b>หลอดไฟ:</b> {{ row[4] }}</p>
-        <p><b>เสาไฟ:</b> {{ row[5] }}</p>
-        <p><b>สายไฟ:</b> {{ row[6] }}</p>
+        <p><b>กิ่ง:</b> {{ row[5] }}</p>
+        <p><b>เสา:</b> {{ row[6] }}</p>
+        <p><b>ระบบไฟเข้า:</b> {{ row[7] }}</p>
+        <p><b>ตอม่อ:</b> {{ row[8] }}</p>
 
         <hr>
 
-        <p><b>พิกัด:</b> {{ row[7] }}, {{ row[8] }}</p>
+        <!-- ✅ พิกัด -->
+        <p><b>พิกัด:</b> {{ row[9] }}, {{ row[10] }}</p>
 
-        {% if row[9] %}
+        <!-- ✅ แผนที่ -->
+        {% if row[11] %}
         <p>
             <b>แผนที่:</b>
-            <a href="{{ row[9] }}" target="_blank"
+            <a href="{{ row[11] }}" target="_blank"
                class="text-blue-500 underline">
                เปิด Google Maps
             </a>
@@ -45,19 +49,20 @@
 
         <hr>
 
-        <p><b>หมายเหตุ:</b> {{ row[10] }}</p>
-        <p><b>สถานที่:</b> {{ row[11] }}</p>
+        <!-- ✅ หมายเหตุ + สถานที่ -->
+        <p><b>หมายเหตุ:</b> {{ row[12] }}</p>
+        <p><b>สถานที่:</b> {{ row[13] }}</p>
 
-        <!-- 🔥 รูปภาพ -->
+        <!-- ✅ รูปภาพ -->
         <div>
             <p class="font-bold mb-2">📸 รูปภาพ:</p>
 
-            {% if row[12] %}
-                <img src="{{ row[12] }}"
+            {% if row[14] %}
+                <img src="{{ row[14] }}"
                      class="w-full max-h-[400px] object-cover rounded-lg shadow cursor-pointer hover:scale-105 transition"
                      onclick="window.open(this.src)">
-            {% elif row[13] %}
-                <img src="/uploads/{{ row[13] }}"
+            {% elif row[15] %}
+                <img src="/uploads/{{ row[15] }}"
                      class="w-full max-h-[400px] object-cover rounded-lg shadow">
             {% else %}
                 <p class="text-gray-400">ไม่มีรูป</p>
