@@ -380,7 +380,7 @@ def login():
             session["user"] = username
             session["role"] = user_role
             session["task"] = "inspection"
-            session["login_at"] = datetime.now().isoformat(timespec="seconds")
+            session["login_at"] = datetime.now(THAI_TZ).isoformat()
             session["logout_at"] = ""
 
             _log_activity("login")
@@ -430,7 +430,7 @@ def register():
 
 @app.get("/logout")
 def logout():
-    session["logout_at"] = datetime.now().isoformat(timespec="seconds")
+    session["logout_at"] = datetime.now(THAI_TZ).isoformat()
     _log_activity("logout")
     session.clear()
     flash("ออกจากระบบแล้ว", "ok")
