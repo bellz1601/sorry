@@ -40,7 +40,9 @@ app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE="Lax")
 HEADERS_USERS = ["username","password","role"]
 HEADERS_INSPECTION = [
     "timestamp","username","tag_id","task",
-    "หลอดไฟ","เสาไฟ","สายไฟ","latitude","longitude","maps_link",
+    "หลอดไฟ","กิ่ง","เสา",
+    "ระบบไฟเข้า","ตอม่อ",   # ✅ เพิ่มตรงนี้
+    "latitude","longitude","maps_link",
     "note","location","photo_url","photo_filename",
     "login_at","logout_at"
 ]
@@ -97,22 +99,42 @@ def get_or_create_worksheet(sh, title, headers):
     return ws
 
 def append_inspection_to_excel(data):
-    wb = load_workbook(INSPECTION_FILE); ws = wb.active
-    ws.append([
-        data["timestamp"], data["username"], data["tag_id"], data["task"],
-        data["หลอดไฟ"], data["เสาไฟ"], data["สายไฟ"], data["latitude"], data["longitude"], data["maps_link"],
-        data["note"], data["location"], data["photo_url"], data["photo_filename"],
-        data["login_at"], data["logout_at"]
-    ])
-    wb.save(INSPECTION_FILE)
+    wb = load_workbook(INSPECTION_FILE)
+    ws = wb.active
 
+    ws.append([
+        data["timestamp"],
+        data["username"],
+        data["tag_id"],
+        data["task"],
+        data["หลอดไฟ"],
+        data["กิ่ง"],
+        data["เสา"],
+        data["ระบบไฟเข้า"],
+        data["ตอม่อ"],
+        data["latitude"],
+        data["longitude"],
+        data["maps_link"],
+        data["note"],
+        data["location"],
+        data["photo_url"],
+        data["photo_filename"],
+        data["login_at"],
+        data["logout_at"]
+    ])
+
+    wb.save(INSPECTION_FILE)   # ✅ ต้องอยู่ใน function
+    wb.close()
 def append_inspection_to_gsheets(data):
     client = _gs_client()
     sh = client.open_by_key(GOOGLE_SHEET_ID)
     ws = get_or_create_worksheet(sh, "inspection", HEADERS_INSPECTION)
+
     ws.append_row([
         data["timestamp"], data["username"], data["tag_id"], data["task"],
-        data["หลอดไฟ"], data["เสาไฟ"], data["สายไฟ"], data["latitude"], data["longitude"], data["maps_link"],
+        data["หลอดไฟ"], data["กิ่ง"], data["เสา"],
+        data["ระบบไฟเข้า"], data["ตอม่อ"],
+        data["latitude"], data["longitude"], data["maps_link"],
         data["note"], data["location"], data["photo_url"], data["photo_filename"],
         data["login_at"], data["logout_at"]
     ])
@@ -236,6 +258,8 @@ def dashboard():
         lamp_val   = (request.form.get('หลอดไฟ') or request.form.get('lamp_head') or "").strip()
         pole_val   = (request.form.get('เสาไฟ')  or request.form.get('pole')      or "").strip()
         wiring_val = (request.form.get('สายไฟ')  or request.form.get('wiring')    or "").strip()
+        base_val = request.form.get('base',"").strip()
+        control_val = request.form.get('control_box',"").strip()
 
         latitude = request.form.get("latitude","").strip()
         longitude = request.form.get("longitude","").strip()
@@ -257,8 +281,10 @@ def dashboard():
             "tag_id": tag_id,
             "task": session.get("task","inspection"),
             "หลอดไฟ": lamp_val,
-            "เสาไฟ": pole_val,
-            "สายไฟ": wiring_val,
+            "กิ่ง": pole_val,
+            "เสา": wiring_val,
+             "ระบบไฟเข้า": base_val,      # ✅ เพิ่ม
+              "ตอม่อ": control_val,  
             "latitude": latitude,
             "longitude": longitude,
             "maps_link": f"https://www.google.com/maps?q={latitude},{longitude}&z=18" if latitude and longitude else "",
@@ -524,13 +550,14 @@ def export_csv():
 
     # หัวตาราง
     writer.writerow([
-        "timestamp","username","tag_id","task",
-        "หลอดไฟ","เสาไฟ","สายไฟ",
-        "latitude","longitude",
-        "maps_link","note","location",
-        "photo_url","photo_file",
-        "login_at","logout_at"
-    ])
+    "timestamp","username","tag_id","task",
+    "หลอดไฟ","กิ่ง","เสา",
+    "ระบบไฟเข้า","ตอม่อ",
+    "latitude","longitude",
+    "maps_link","note","location",
+    "photo_url","photo_file",
+    "login_at","logout_at"
+])
 
     # ข้อมูลจริงจาก Excel
     for row in ws.iter_rows(min_row=2, values_only=True):
