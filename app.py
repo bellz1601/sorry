@@ -173,7 +173,7 @@ def _log_activity(action):
     try:
         wb = load_workbook(ACTIVITY_FILE); ws = wb.active
         ws.append([
-            datetime.now().isoformat(timespec="seconds"),
+            datetime.now(THAI_TZ).isoformat(timespec="seconds")
             session.get("user",""),
             action,
             session.get("task","inspection"),
