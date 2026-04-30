@@ -98,55 +98,49 @@ focus:outline-none focus:ring-0 focus:border-slate-300">
       <!-- 2) โครงสร้างเสา -->
 <button type="button" data-part="pole"
   class="icon-btn absolute top-[400px] left-1/2 -translate-x-1/2"
-  title="2) โครงสร้างเสา" aria-label="โครงสร้างเสา">
+  title="2) กิ่ง" aria-label="กิ่ง">
   <span class="badge">2</span>
-  <!-- ไอคอนเสา (แบบกลม) -->
+
   <svg viewBox="0 0 24 24" class="w-9 h-9">
-    <rect x="10" y="3" width="4" height="18" rx="2" 
-          fill="url(#gradPole)" stroke="#334155" stroke-width="1.2"/>
-    <defs>
-      <linearGradient id="gradPole" x1="0" x2="1" y1="0" y2="0">
-        <stop offset="0%" stop-color="#9ca3af"/>
-        <stop offset="100%" stop-color="#6b7280"/>
-      </linearGradient>
-    </defs>
+    <path d="M3 12h10l5-5" stroke="#0f172a" stroke-width="2" fill="none"/>
+    <circle cx="18" cy="7" r="2" fill="#0ea5e9"/>
   </svg>
 </button>
-
 <!-- 3) สายไฟ -->
 <button type="button" data-part="wiring"
   class="icon-btn absolute bottom-[70px] left-1/2 -translate-x-1/2"
-  title="3) สายไฟ" aria-label="สายไฟ">
+  title="3) เสา" aria-label="เสา">
   <span class="badge">3</span>
-  <!-- ไอคอนสายไฟ -->
-  <svg viewBox="0 0 32 24" class="w-9 h-9">
-    <path d="M2 12 C8 4, 24 20, 30 12" 
-          fill="none" stroke="#0f172a" stroke-width="2"/>
-    <!-- จุดปลายสาย -->
-    <circle cx="2" cy="12" r="2" fill="#0ea5e9"/>
-    <circle cx="30" cy="12" r="2" fill="#0ea5e9"/>
+
+  <svg viewBox="0 0 24 24" class="w-9 h-9">
+    <rect x="10" y="3" width="4" height="18" rx="2" fill="#64748b"/>
   </svg>
 </button>
 
   <!-- 4) ฐานเสา -->
 <button type="button" data-part="base"
   class="icon-btn absolute bottom-[10px] left-1/2 -translate-x-1/2"
-  title="4) ฐานเสา">
+  title="4) ระบบไฟเข้า">
   <span class="badge">4</span>
+
   <svg viewBox="0 0 24 24" class="w-9 h-9">
-    <rect x="6" y="16" width="12" height="4" fill="#64748b"/>
+    <path d="M12 2v10" stroke="#0ea5e9" stroke-width="2"/>
+    <path d="M8 8l4 4 4-4" stroke="#0ea5e9" stroke-width="2" fill="none"/>
+    <rect x="9" y="14" width="6" height="6" fill="#94a3b8"/>
   </svg>
 </button>
 
 <!-- 5) กล่องควบคุม -->
 <button type="button" data-part="control_box"
   class="icon-btn absolute top-[250px] left-[100px]"
-  title="5) กล่องควบคุม">
+  title="5) ตอม่อ">
   <span class="badge">5</span>
+
   <svg viewBox="0 0 24 24" class="w-9 h-9">
-    <rect x="5" y="5" width="14" height="14" fill="#94a3b8"/>
+    <rect x="5" y="14" width="14" height="6" fill="#475569"/>
+    <rect x="8" y="10" width="8" height="4" fill="#64748b"/>
   </svg>
-</button>        
+</button>
 
     </div>
 
