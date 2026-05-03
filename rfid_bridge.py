@@ -160,3 +160,11 @@ def start_tagstream_in_background(host="0.0.0.0", port=4000):
 
     th = threading.Thread(target=_server, daemon=True)
     th.start()
+
+if __name__ == "__main__":
+    print("🚀 Starting RFID Bridge...")
+    start_tagstream_in_background(host="0.0.0.0", port=4000)
+
+    # กันโปรแกรมปิด
+    while True:
+        pass
