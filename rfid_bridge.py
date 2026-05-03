@@ -21,11 +21,12 @@ import requests  # 👈 เพิ่มบรรทัดนี้
 def send_to_web(epc, rssi):
     try:
         requests.post(
-            "https://YOUR-APP.onrender.com/api/tags",  # 🔥 เปลี่ยนเป็นลิงก์คุณ
+            "https://sorry-81tw.onrender.com/api/tags",
             json={
                 "epc": epc,
                 "rssi": rssi
-            }
+            },
+            timeout=2
         )
     except Exception as e:
         print("❌ post fail:", e)
