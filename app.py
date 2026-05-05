@@ -37,7 +37,7 @@ app.secret_key = 'supersecretkey'
 app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE="Lax")
 
 # ---- Start RFID TagStream listener ----
- start_tagstream_in_background(host="0.0.0.0", port=4000)
+ #start_tagstream_in_background(host="0.0.0.0", port=4000)
 
 HEADERS_USERS = ["username","password","role"]
 HEADERS_INSPECTION = [
