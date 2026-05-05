@@ -37,7 +37,7 @@ app.secret_key = 'supersecretkey'
 app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE="Lax")
 
 # ---- Start RFID TagStream listener ----
- #start_tagstream_in_background(host="0.0.0.0", port=4000)
+ start_tagstream_in_background(host="0.0.0.0", port=4000)
 
 HEADERS_USERS = ["username","password","role"]
 HEADERS_INSPECTION = [
@@ -221,21 +221,30 @@ def require_login_globally():
 @app.get("/api/tags")
 def api_tags():
     since = request.args.get("since")
-    # จาก hardware bridge (จริง)
+
+    # ✅ ของจริงจาก RFID bridge
     real_items = read_tags_since(since)
     real_latest = latest_ts()
-    # จากการบันทึกใน Dashboard (จำลอง)
+
+    # ✅ ของจำลอง (dashboard)
     sim_items = sim_tags_since(since)
     sim_latest = sim_items[-1]["ts"] if sim_items else None
 
+    # รวม
     items = []
-    if real_items: items.extend(real_items)
-    if sim_items: items.extend(sim_items)
+    if real_items:
+        items.extend(real_items)
+    if sim_items:
+        items.extend(sim_items)
 
     latest = real_latest
     if sim_latest and (latest is None or sim_latest > latest):
         latest = sim_latest
-    return jsonify({"items": items, "latest_ts": latest})
+
+    return jsonify({
+        "items": items,
+        "latest_ts": latest
+    })
 
 @app.post("/api/tags/clear")
 def api_tags_clear():
@@ -530,7 +539,10 @@ def receive_tag():
     data = request.json
 
     SIM_TAG_BUFFER.append({
-        "ts": datetime.now().isoformat(),
+        "ts": datetime.now(timezone.utc)
+              .replace(microsecond=0)
+              .isoformat()
+              .replace("+00:00","Z"),
         "epc": data.get("epc"),
         "rssi": data.get("rssi"),
         "antenna": "rfid"
