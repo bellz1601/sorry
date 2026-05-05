@@ -540,20 +540,23 @@ def delete_log(row_id):
 
 @app.post("/api/tags")
 def receive_tag():
-    data = request.json
+    data = request.json or request.form or {}
+
+    print("🔥 RAW:", data, flush=True)
+
+    epc = data.get("epc") or data.get("EPC") or data.get("tag")
 
     SIM_TAG_BUFFER.append({
         "ts": datetime.now(timezone.utc)
               .replace(microsecond=0)
               .isoformat()
               .replace("+00:00","Z"),
-        "epc": data.get("epc"),
+        "epc": epc,
         "rssi": data.get("rssi"),
         "antenna": "rfid"
     })
 
     return {"ok": True}
-
 @app.route("/export-csv")
 def export_csv():
 
