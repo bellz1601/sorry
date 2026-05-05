@@ -1,141 +1,165 @@
-
-# rfid_bridge.py  (ADD-ONLY)
-# -----------------------------------------------------------
-# Minimal TCP TagStream bridge for Alien readers.
-# Listens on host:port (default 0.0.0.0:4000), parses each line,
-# and exposes helper functions used by your app:
-#   - start_tagstream_in_background(host, port)
-#   - read_tags_since(since_iso8601)
-#   - latest_ts()
-#   - clear_tags()
-#
-# This file is ADD-ONLY. Drop it alongside your app.py without editing app.py.
-# Your app already imports: from rfid_bridge import start_tagstream_in_background, read_tags_since, latest_ts, clear_tags
-# -----------------------------------------------------------
+# rfid_bridge.py (FINAL STABLE VERSION)
 
 import socket
 import threading
 import json
-import requests  # 👈 เพิ่มบรรทัดนี้
-
-def send_to_web(epc, rssi):
-    try:
-        requests.post(
-            "https://sorry-81tw.onrender.com/api/tags",
-            json={
-                "epc": epc,
-                "rssi": rssi
-            },
-            timeout=2
-        )
-    except Exception as e:
-        print("❌ post fail:", e)
+import requests
 from datetime import datetime, timezone
 from collections import deque
 
-# In-memory buffer (adjust if you need more history)
+# ================= CONFIG =================
+POST_URL = "https://sorry-81tw.onrender.com/api/tags"
+
+# ================= BUFFER =================
 _TAG_BUFFER = deque(maxlen=2000)
 _LATEST_TS = None
+_LAST_SEEN = {}   # 🔥 ใช้กันยิงซ้ำ
 
+# ================= UTIL =================
 def _now_iso_utc():
-    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00","Z")
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
 
 def latest_ts():
     return _LATEST_TS
+
 
 def clear_tags():
     global _LATEST_TS
     _TAG_BUFFER.clear()
     _LATEST_TS = None
 
+
 def read_tags_since(since: str | None):
-    # Return list of items since 'since' (ISO8601). If since=None, return all buffered items.
     if not since:
         return list(_TAG_BUFFER)
     return [t for t in _TAG_BUFFER if t.get("ts") and t["ts"] >= since]
 
+
 def _append_item(item):
     global _LATEST_TS
     _TAG_BUFFER.append(item)
+
     ts = item.get("ts") or _now_iso_utc()
     item["ts"] = ts
+
     if (not _LATEST_TS) or (ts > _LATEST_TS):
         _LATEST_TS = ts
 
+
+# ================= NETWORK =================
+def send_to_web(epc, rssi):
+    try:
+        res = requests.post(
+            POST_URL,
+            json={"epc": epc, "rssi": rssi},
+            timeout=5
+        )
+        print("✅ sent:", res.status_code)
+    except Exception as e:
+        print("❌ post fail:", e)
+
+
+# ================= PARSER =================
 def _parse_line(line: str):
     line = (line or "").strip()
     if not line:
+        return None
+
+    low = line.lower()
+
+    # 🔥 กัน packet ขาด (line ยังไม่ครบ)
+    if "tag:" in low and "," not in line:
         return None
 
     # -------- JSON --------
     if line.startswith("{") and line.endswith("}"):
         try:
             d = json.loads(line)
-            ts = d.get("ts") or _now_iso_utc()
 
             epc = (d.get("epc") or d.get("tag") or "").strip()
-            ant = str(d.get("antenna") or "").strip()
-            rssi = str(d.get("rssi") or "").strip()
+            epc_clean = epc.replace(" ", "")
 
-            if epc:
-                return {
-                    "ts": ts,
-                    "epc": epc,
-                    "tag_id": epc[-8:],   # 👈 ตรงนี้คือ Tag ID
-                    "antenna": ant,
-                    "rssi": rssi
-                }
+            if not epc_clean:
+                return None
+
+            return {
+                "ts": _now_iso_utc(),
+                "epc": epc_clean,
+                "tag_id": epc_clean[-4:],
+                "antenna": str(d.get("antenna") or ""),
+                "rssi": str(d.get("rssi") or "")
+            }
         except:
             return None
 
-    # -------- TEXT --------
-    low = line.lower()
-
-    def get(x):
-        i = low.find(x)
+    # -------- TEXT (Alien) --------
+    def get(key):
+        i = low.find(key)
         if i == -1:
             return ""
-        return line[i+len(x):].split(",")[0].strip()
+        return line[i + len(key):].split(",")[0].strip()
 
-    epc = get("epc:") or get("tag:")
+    epc = get("tag:") or get("epc:")
+    if not epc:
+        return None
+
+    epc_clean = epc.replace(" ", "")
+
+    ant = get("ant:") or get("antenna:")
     rssi = get("rssi:")
-    ant = get("antenna:")
 
-    if epc:
-        return {
-            "ts": _now_iso_utc(),
-            "epc": epc,
-            "tag_id": epc[-8:],   # 👈 Tag ID
-            "antenna": ant,
-            "rssi": rssi
-        }
+    return {
+        "ts": _now_iso_utc(),
+        "epc": epc_clean,
+        "tag_id": epc_clean[-4:],
+        "antenna": ant,
+        "rssi": rssi
+    }
 
-    return None
-    
 
-    
+# ================= CLIENT =================
 def _client_handler(conn, addr):
+    print("📡 Connected from:", addr)
+
     try:
         with conn:
-            buf = b""
+            buffer = ""
+
             while True:
                 data = conn.recv(4096)
                 if not data:
                     break
-                buf += data
-                while b"\n" in buf:
-                    line, buf = buf.split(b"\n", 1)
-                    try:
-                        s = line.decode("utf-8", errors="ignore")
-                    except Exception:
-                        s = ""
 
-                    item = _parse_line(s)
+                chunk = data.decode("utf-8", errors="ignore")
+                buffer += chunk
+
+                lines = buffer.split("\n")
+                buffer = lines.pop()
+
+                for line in lines:
+                    line = line.strip()
+                    if not line:
+                        continue
+
+                    print("RAW:", line)
+
+                    item = _parse_line(line)
 
                     if item:
+                        print("🔥 PARSED:", item)
+
+                        # 🔥 กันยิงซ้ำ (2 วินาที)
+                        key = item["epc"]
+                        now = datetime.now().timestamp()
+
+                        if key in _LAST_SEEN and now - _LAST_SEEN[key] < 2:
+                            continue
+
+                        _LAST_SEEN[key] = now
+
                         _append_item(item)
 
-                        # 🔥 ส่งไปเว็บ (อยู่ใน if และ loop เท่านั้น)
                         try:
                             send_to_web(item.get("epc"), item.get("rssi"))
                         except Exception as e:
@@ -143,28 +167,35 @@ def _client_handler(conn, addr):
 
     except Exception as e:
         print("RFID client error:", e)
+
+
+# ================= SERVER =================
 def start_tagstream_in_background(host="0.0.0.0", port=4000):
-    # Start TCP server that accepts TagStream connections from Alien readers.
     def _server():
         srv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         srv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         srv.bind((host, port))
         srv.listen(8)
-        print(f"RFID TagStream server listening on {host}:{port}", flush=True)
+
+        print(f"🚀 RFID TagStream server listening on {host}:{port}", flush=True)
+
         while True:
             conn, addr = srv.accept()
-            t = threading.Thread(target=_client_handler, args=(conn, addr), daemon=True)
-            t.start()
 
-    
+            t = threading.Thread(
+                target=_client_handler,
+                args=(conn, addr),
+                daemon=True
+            )
+            t.start()
 
     th = threading.Thread(target=_server, daemon=True)
     th.start()
 
-if __name__ == "__main__":
-    print("🚀 Starting RFID Bridge...")
-    start_tagstream_in_background(host="0.0.0.0", port=4000)
 
-    # กันโปรแกรมปิด
+# ================= MAIN =================
+if __name__ == "__main__":
+    start_tagstream_in_background()
+
     while True:
         pass
