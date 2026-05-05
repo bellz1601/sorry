@@ -207,7 +207,11 @@ def sim_tags_since(since: str | None):
     return [t for t in SIM_TAG_BUFFER if t["ts"] >= since]
 
 # ---------- global auth guard ----------
-PUBLIC_ENDPOINTS = {'login', 'register', 'topic3', 'static'}
+PUBLIC_ENDPOINTS = {
+    'login', 'register', 'topic3', 'static',
+    'api_tags',        # GET /api/tags
+    'receive_tag'      # POST /api/tags
+}
 @app.before_request
 def require_login_globally():
     # อนุญาตหน้า public
