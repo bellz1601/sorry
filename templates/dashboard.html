@@ -429,7 +429,7 @@ navigator.geolocation.getCurrentPosition(function(pos){
 <script>
   document.addEventListener("DOMContentLoaded", function(){
     document.getElementById("inspect-form").addEventListener("submit", function(e){
-        e.preventDefault(); // 🔥 ใส่ตรงนี้
+        //e.preventDefault(); // 🔥 ใส่ตรงนี้
         console.log("LAT:", document.getElementById("latitude").value);
         console.log("LNG:", document.getElementById("longitude").value);
     });
