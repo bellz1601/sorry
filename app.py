@@ -513,9 +513,9 @@ def map_page():
             poles.append({
                 "tag_id": row[2],
                 "pole_name": "",  # ยังไม่มีใน Excel เดิม
-                "latitude": row[7],
-                "longitude": row[8],
-                "location": row[10],
+                "latitude": row[9],
+                "longitude": row[10],
+                "location": row[13],
             })
         except:
             continue
