@@ -417,4 +417,22 @@ input:focus {
   border-color: #cbd5e1 !important; /* slate-300 */
 }
 </style>
+        <script>
+navigator.geolocation.getCurrentPosition(function(pos){
+    const lat = document.getElementById("latitude");
+    const lng = document.getElementById("longitude");
+
+    if (!lat.value) lat.value = pos.coords.latitude;
+    if (!lng.value) lng.value = pos.coords.longitude;
+});
+</script>
+<script>
+  document.addEventListener("DOMContentLoaded", function(){
+    document.getElementById("inspect-form").addEventListener("submit", function(e){
+        e.preventDefault(); // 🔥 ใส่ตรงนี้
+        console.log("LAT:", document.getElementById("latitude").value);
+        console.log("LNG:", document.getElementById("longitude").value);
+    });
+  });
+</script>
 {% endblock %}
