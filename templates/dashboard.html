@@ -256,7 +256,8 @@ focus:outline-none focus:ring-0 focus:border-slate-300">
     const latest = data.items[data.items.length - 1];
 
 // ✅ ใส่ค่าถูกช่อง
-document.getElementById('tag_id').value = latest.tag_id || '';
+document.getElementById('tag_id').value =
+  latest.tag_id || (latest.epc ? latest.epc.slice(-4) : '');
 document.getElementById('epc').value = latest.epc || '';
 document.getElementById('rssi').value = latest.rssi || '';
 
@@ -395,7 +396,8 @@ TagStreamClient.start({
     // 🔥 ถ้ามีค่าแล้ว (ผู้ใช้พิมพ์เอง) → ห้ามทับ
     if (tagInput.value.trim() !== "") return;
 
-    document.getElementById('tag_id').value = t.tag_id || '';
+    document.getElementById('tag_id').value =
+  t.tag_id || (t.epc ? t.epc.slice(-4) : '');
     document.getElementById('epc').value = t.epc || '';
     document.getElementById('rssi').value = t.rssi || '';
 
