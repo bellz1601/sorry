@@ -385,24 +385,33 @@ const mapObj = {
 TagStreamClient.start({
   onTags: (items) => {
 
-    const t = items[items.length - 1];
-    if (!t) return;
-
     const tagInput = document.getElementById('tag_id');
 
-    // 🔒 ถ้ากดยืนยันแล้ว → หยุด
+    // ถ้ากดยืนยันแท็กแล้ว ไม่ต้องเปลี่ยนค่า
     if (tagInput.readOnly) return;
 
-    // 🔥 ถ้ามีค่าแล้ว (ผู้ใช้พิมพ์เอง) → ห้ามทับ
-    if (tagInput.value.trim() !== "") return;
+    // ===== ไม่มีแท็ก =====
+    if (!items || items.length === 0) {
 
-    document.getElementById('tag_id').value =
-  t.tag_id || (t.epc ? t.epc.slice(-4) : '');
-    document.getElementById('epc').value = t.epc || '';
-    document.getElementById('rssi').value = t.rssi || '';
+      tagInput.value = "";
+      document.getElementById("epc").value = "";
+      document.getElementById("rssi").value = "";
+      document.getElementById("tag-time").innerText = "";
 
-    document.getElementById('tag-time').innerText =
-      'เวลาที่สแกน: ' + (t.ts || '-');
+      return;
+    }
+
+    // ===== มีแท็ก =====
+    const t = items[items.length - 1];
+
+    document.getElementById("tag_id").value =
+      t.tag_id || (t.epc ? t.epc.slice(-4) : "");
+
+    document.getElementById("epc").value = t.epc || "";
+    document.getElementById("rssi").value = t.rssi || "";
+
+    document.getElementById("tag-time").innerText =
+      "เวลาที่สแกน: " + (t.ts || "-");
   }
 });
 </script>
