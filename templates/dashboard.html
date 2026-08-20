@@ -245,7 +245,27 @@ focus:outline-none focus:ring-0 focus:border-slate-300">
   const diagramWrap = document.getElementById('diagram-wrap');
   confirmBtn.addEventListener('click', async () => {
   try {
-    const res = await fetch('/api/tags', { credentials: 'same-origin' });
+    // เริ่มการค้นหารอบใหม่: ล้างแท็กเก่าก่อน
+    await fetch('/api/tags/clear', {
+      method: 'POST',
+      credentials: 'same-origin',
+      cache: 'no-store'
+    });
+
+    // ล้างค่าที่ค้างอยู่บนหน้าจอ
+    document.getElementById('tag_id').value = '';
+    document.getElementById('epc').value = '';
+    document.getElementById('rssi').value = '';
+    const tagTimeEl = document.getElementById('tag-time');
+    if (tagTimeEl) tagTimeEl.innerText = '';
+
+    // รอให้เครื่องอ่านมีเวลาส่งแท็กใหม่เข้ามา
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    const res = await fetch('/api/tags', {
+      credentials: 'same-origin',
+      cache: 'no-store'
+    });
     const data = await res.json();
 
     if (!data.items || data.items.length === 0) {
