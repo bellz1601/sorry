@@ -12,6 +12,7 @@ POST_URL = "https://sorry-81tw.onrender.com/api/tags"
 
 # ================= BUFFER =================
 _TAG_BUFFER = deque(maxlen=2000)
+_LAST_SEEN = {}
 _LATEST_TS = None
 _LAST_READ_TIME = None   # 🔥 ใช้กันยิงซ้ำ
 
@@ -31,32 +32,25 @@ def clear_tags():
 
 
 def read_tags_since(since):
-    global _LAST_READ_TIME
-
-    # ถ้าเกิน 2 วินาทีไม่มีการอ่านแท็ก
-    if _LAST_READ_TIME and datetime.now() - _LAST_READ_TIME > timedelta(seconds=2):
-        _TAG_BUFFER.clear()
-        return []
-
+    """Return tags newer than `since`; do not reuse stale data."""
     if not since:
         return list(_TAG_BUFFER)
 
-    return [t for t in _TAG_BUFFER if t.get("ts") and t["ts"] >= since]
-
-
+    return [
+        t for t in _TAG_BUFFER
+        if t.get("ts") and t["ts"] > since
+    ]
 def _append_item(item):
     global _LATEST_TS, _LAST_READ_TIME
 
-    _TAG_BUFFER.clear()        # เหลือเฉพาะแท็กล่าสุด
+    item["ts"] = item.get("ts") or _now_iso_utc()
+
+    # Keep only the newest tag so an old tag is not reused.
+    _TAG_BUFFER.clear()
     _TAG_BUFFER.append(item)
 
-    ts = item.get("ts") or _now_iso_utc()
-    item["ts"] = ts
-
-    _LATEST_TS = ts
+    _LATEST_TS = item["ts"]
     _LAST_READ_TIME = datetime.now()
-
-# ================= NETWORK =================
 def send_to_web(epc, rssi):
     try:
         res = requests.post(
