@@ -32,7 +32,7 @@
     <label class="text-xs">Tag ID</label>
     <input id="tag_id" name="post_id"
 class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm h-10
-focus:outline-none focus:ring-0 focus:border-slate-300">
+focus:outline-none focus:ring-0 focus:border-slate-300" autocomplete="off">
   </div>
 
   <div>
@@ -238,6 +238,17 @@ focus:outline-none focus:ring-0 focus:border-slate-300">
     box-shadow: 0 2px 6px rgba(14,165,233,.35);
   }
 </style>
+
+
+<script>
+// ฟอร์มใหม่ต้องเริ่มด้วย Tag ID ว่างเสมอ หลังกลับมาจากการบันทึก/รีเฟรชหน้า
+window.addEventListener('pageshow', () => {
+  const tagInput = document.getElementById('tag_id');
+  if (tagInput && !tagInput.readOnly) {
+    tagInput.value = '';
+  }
+});
+</script>
 
 <script>
   // เปิดใช้งานผังหลังค้นหาแท็ก
