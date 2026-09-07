@@ -317,8 +317,9 @@ def dashboard():
         except Exception as e:
             print("❌ GSheet inspection append failed:", e)
 
-        # push tag ไป Topic 3 แบบจำลอง
-        add_sim_tag(tag_id)
+        # ล้างแท็กจำลอง/แท็กเก่าหลังบันทึก เพื่อไม่ให้รายการเดิมถูกเติมกลับในฟอร์มใหม่
+        clear_tags()
+        SIM_TAG_BUFFER.clear()
 
         session["last_saved"] = data
         flash("บันทึกงานตรวจเรียบร้อย", "ok")
